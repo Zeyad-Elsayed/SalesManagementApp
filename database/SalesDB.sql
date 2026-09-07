@@ -40,9 +40,6 @@ CREATE TABLE unit (
         FOREIGN KEY (building_id)
         REFERENCES building(building_id),
 
-    CONSTRAINT uq_unit_building
-        UNIQUE (building_id, unit_number),
-
     CONSTRAINT chk_unit_area
         CHECK (area > 0),
 
@@ -207,3 +204,10 @@ CREATE TABLE installment_plan (
     CONSTRAINT chk_frequency_months
         CHECK (frequency_months IN (3, 6, 12))
 );
+
+
+
+ALTER TABLE unit 
+    DROP CONSTRAINT uq_unit_building,
+    ADD CONSTRAINT uq_unit_building_floor UNIQUE (building_id, floor, unit_number);
+
