@@ -41,3 +41,18 @@ new_sale AS (
 INSERT INTO customer_sale (customer_id, sale_id)
 SELECT new_customer.customer_id, new_sale.sale_id
 FROM new_customer, new_sale;
+
+INSERT INTO installment_plan (
+    amount, 
+    installment_count, 
+    frequency_months, 
+    first_installment_date, 
+    sale_id
+)
+SELECT 
+    100000.00,          -- قيمة القسط
+    25,                 -- عدد الأقساط
+    3,                  -- التردد (3 شهور للالتزام بشرط CHECK)
+    '2026-11-15',       -- تاريخ استحقاق أول قسط
+    new_sale.sale_id    -- ربط الخطة برقم البيع المستخرج من الكتلة الثانية
+FROM new_sale;
