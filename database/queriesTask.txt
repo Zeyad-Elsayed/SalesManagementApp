@@ -1,0 +1,98 @@
+1. Get all projects Order by project name.
+
+2. Get all buildings for a specific project.
+
+3. Get all units in a specific building.
+
+4. Get all available units.
+
+5. Get all units on a specific floor in a specific buidling.
+
+6. Get all sold units in a specific project.
+
+7. Get the number of units in each project.
+
+8. Get the number of units by status for each project.
+
+10. Get all customers.
+
+11. Get all phone numbers for one customer.
+
+12. Get all sales.
+
+13. Get all reserved sales.
+
+14. Get all contracted sales Order by contract date descending.
+
+15. Get all sales above 4000000
+
+16. Get complete information for one sale.
+
+    * Input: project, building, unit
+    * get:
+
+    ```text
+    customer
+    project
+    building
+    unit
+    floor
+    area
+    price
+    reservation amount/date
+    contract amount/date
+    handover amount/date
+    maintenance deposit
+    services deposit
+    status
+    ```
+
+17. Get all customers attached to one sale.
+
+18. Get all sales belonging to a specific customer.
+
+19. Get customers who have more than one sale.
+
+20. Get all installment plans.
+
+21. Get all quarterly installment plans.
+
+22. Get all semi-annual installment plans.
+
+23. Get all annual installment plans.
+
+24. Get installment plans for one sale.
+
+25. Get sales that have more than one installment plan.
+
+26. Get the total sales value for each project.
+
+27. Get the average sale price for each project.
+
+28. Get the most expensive sale in the database.
+
+29. Get the cheapest sale in the database.
+
+30. Get the most expensive sale in each project.
+
+31. Get projects whose total sales value exceeds `5,000,000`.
+
+32. Get the number of sales in each project.
+
+33. Get the number of customers per project.
+
+34. Get all jointly owned sales.
+
+    * Meaning sales associated with more than one customer.
+
+35. Get units that have never had a sale.
+
+36. Get units that have had at least one sale.
+
+37. Get all cancelled sales.
+
+38. Get units whose most recent sale is cancelled.
+
+39. Get the total customer obligation for every sale.
+
+    * Formula: price + maintenance_deposit + services_deposit
