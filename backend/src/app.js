@@ -5,14 +5,18 @@ const app = express();
 
 app.use(express.json());
 
+// ----------------------------------------------------
 // 1. Health check endpoint (Stage 1 & 2)
+// ----------------------------------------------------
 app.get('/', (req, res) => {
   res.status(200).json({
     message: 'Sales API is running',
   });
 });
 
+// ----------------------------------------------------
 // 2. GET /api/projects (Stage 2 Verification)
+// ----------------------------------------------------
 app.get('/api/projects', async (req, res) => {
   try {
     const result = await pool.query(
@@ -25,7 +29,9 @@ app.get('/api/projects', async (req, res) => {
   }
 });
 
+// ----------------------------------------------------
 // 3. POST /api/projects (Stage 3 - Task A)
+// ----------------------------------------------------
 app.post('/api/projects', async (req, res) => {
   const { project_name } = req.body;
 
@@ -62,7 +68,9 @@ app.post('/api/projects', async (req, res) => {
   }
 });
 
+// ----------------------------------------------------
 // 4. POST /api/buildings (Stage 3 - Task B)
+// ----------------------------------------------------
 app.post('/api/buildings', async (req, res) => {
   const { building_number, project_id } = req.body;
 
@@ -115,7 +123,9 @@ app.post('/api/buildings', async (req, res) => {
   }
 });
 
+// ----------------------------------------------------
 // 5. POST /api/units (Stage 3 - Task C)
+// ----------------------------------------------------
 app.post('/api/units', async (req, res) => {
   const { unit_number, floor, area, building_id } = req.body;
 
@@ -201,7 +211,9 @@ app.post('/api/units', async (req, res) => {
   }
 });
 
+// ----------------------------------------------------
 // 6. POST /api/sales (Stage 3 - Atomic Sale API)
+// ----------------------------------------------------
 app.post('/api/sales', async (req, res) => {
   const {
     unit_id,
