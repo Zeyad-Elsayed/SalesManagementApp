@@ -1,6 +1,6 @@
 # Real-Estate Sales Management System Backend
 
-Comprehensive Node.js & PostgreSQL backend system built across three development stages, containerized with Docker.
+Comprehensive Node.js & PostgreSQL backend system built across four development stages, containerized with Docker, featuring modular architecture (Routes, Controllers, Services), atomic transactions, and financial projections.
 
 ---
 
@@ -42,6 +42,14 @@ View container logs:
 
 ---
 
+## Architecture & Codebase Structure
+The backend follows a strict modular separation of concerns:
+- **`Routes` (`backend/src/routes/`)**: Maps incoming HTTP requests to their respective controllers.
+- **`Controllers` (`backend/src/controllers/`)**: Handles HTTP request validation, status codes, and response formatting.
+- **`Services` (`backend/src/services/`)**: Encapsulates complex business logic, data assembly, and financial/date calculations (e.g., Sale Agreement & Handover Projections).
+
+---
+
 ## Stages Overview & API Specifications
 
 ### Stage 1: Project Setup & Database Connectivity
@@ -54,7 +62,6 @@ View container logs:
 - Automatic schema creation (`01-schema.sql`) and deterministic seed insertion (`02-seed.sql`) via `/docker-entrypoint-initdb.d/`.
 - Health check via `pg_isready` ensuring backend starts only after the database is healthy.
 - Internal service discovery using `DB_HOST=db`.
-- **GET /api/projects**: Verification endpoint reading seeded projects from PostgreSQL.
 
 ### Stage 3: Data Insertion APIs & Atomic Transactions
 - **POST /api/projects**: Create an individual project with length validation and duplicate name rejection (`409 Conflict`).
@@ -67,39 +74,18 @@ View container logs:
   - Inserts one or more installment plans matching financial balance.
   - Transitions unit status to `RESERVED`.
 
-#### Example Sale Creation Request (POST /api/sales):
+### Stage 4: Read-Only GET Endpoints & Sale Agreement
+- **GET /api/projects**: Returns all projects ordered alphabetically by `project_name` (`200 OK`).
+- **GET /api/projects/:projectId/buildings**: Returns buildings belonging to the specified project, ordered by `building_number`. Validates positive integer IDs and existence (`400`, `404`).
+- **GET /api/projects/:projectId/units**: Returns project details along with units grouped under their respective buildings (including empty buildings), sorted consistently by floor ascending then unit number.
+- **GET /api/sales/:saleId/agreement**: Returns a complete, un-duplicated sale agreement object containing:
+  - **Customers**: Array of customers with all associated phone numbers (using PostgreSQL JSON aggregation).
+  - **Property Hierarchy**: Project, building, and unit details with precise financial formatting (e.g., area and prices formatted to 2 decimal places).
+  - **Financial Terms & Installment Plans**: Full pricing, deposits, and installment schedules with calculated plan totals.
+  - **Handover Summary**: As-of-date contractual projection (`scheduled_due_by_handover`, `percentage_due_by_handover`, and `calculation_status`).
 
-    {
-      "unit_id": 3,
-      "price": 3000000,
-      "reservation_date": "2026-10-18",
-      "reservation_amount": 100000,
-      "contract_date": null,
-      "contract_amount": null,
-      "handover_date": "2030-01-01",
-      "handover_amount": 300000,
-      "maintenance_deposit": 150000,
-      "services_deposit": 150000,
-      "customers": [
-        {
-          "national_id": "39901010188888",
-          "full_name": "Mostafa Mahmoud",
-          "address": "Alexandria",
-          "phone_numbers": ["01018888881", "01228888881"]
-        }
-      ],
-      "installment_plans": [
-        {
-          "amount": 100000,
-          "installment_count": 20,
-          "frequency_months": 3,
-          "first_installment_date": "2027-01-01"
-        },
-        {
-          "amount": 150000,
-          "installment_count": 4,
-          "frequency_months": 6,
-          "first_installment_date": "2027-06-01"
-        }
-      ]
-    }
+#### Handover Percentage Calculation Specification
+The scheduled amount by handover includes payment obligations whose associated dates fall **on or before** the handover date, including the handover payment itself:
+- **Numerator**: Reservation amount (if date $\le$ handover date) + Contract amount (if date $\le$ handover date) + Handover amount + Sum of installment amounts due $\le$ handover date.
+- **Denominator**: Unit sale price (`sale.price`).
+- **Edge Cases Handled**: Missing handover dates (`MISSING_HANDOVER_DATE`), incomplete contract terms (`INCOMPLETE_TERMS`), and missing installment plans. Dates are formatted consistently as `DD-MM-YYYY`.
