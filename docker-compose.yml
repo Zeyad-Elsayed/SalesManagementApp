@@ -1,14 +1,11 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: sales-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME:-sales_db}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-    ports:
-      - "${DB_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./database/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
@@ -18,13 +15,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
   backend:
     build: ./backend
-    container_name: sales-backend
     restart: unless-stopped
-    ports:
-      - "${PORT:-3000}:3000"
     environment:
       PORT: 3000
       DB_HOST: db
@@ -32,9 +27,30 @@ services:
       DB_NAME: ${DB_NAME:-sales_db}
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     depends_on:
       db:
         condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-Y", "off", "--quiet", "--spider", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
 volumes:
   pgdata:
